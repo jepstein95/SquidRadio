@@ -1,0 +1,91 @@
+nav.navbar {
+  border-radius: 0;
+}
+
+span.navbar-brand {
+  cursor: pointer;
+}
+
+.tab-content {
+  margin-top: 21px;
+}
+
+.shairport .toggle,
+.lightshow .toggle {
+  width: 70px !important;
+  height: 45px !important;
+}
+
+input[type=number] {
+  margin-left:  15px;
+  margin-right: 30px;
+}
+
+@media only screen and (max-width : 768px) {
+  input[type=number] {
+    margin-left:  0;
+    margin-right: 0;
+  }
+}
+
+ul.ul-leds {
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+}
+
+ul.ul-leds li {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+ul.ul-leds li > span {
+  width: 20px;
+  display: inline-block;
+  vertical-align: sub;
+  margin-right: 16px;
+}
+
+ul.ul-leds li > .toggle {
+  margin-right: 4px;  
+}
+
+legend span {
+  font-size: 18px;
+  font-weight: 100;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.slider.slider-horizontal {
+  margin-left: 24px;
+}
+
+.slider-selection {
+  background: #375a7f;
+}
+
+.modal-color .modal-body {
+  text-align: center;
+  word-spacing: 20px;
+}
+
+.modal-color .picker,
+.modal-color .display {
+  display: inline-block;
+}
+
+.modal-color .display {
+  height: 194px;
+  width: 194px;
+  vertical-align: top;
+}
+
+.modal-color .display .old,
+.modal-color .display .new {
+  width: 100%;
+  margin-bottom: 20px;
+  cursor: pointer;
+}

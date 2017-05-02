@@ -1,0 +1,58 @@
+<%--
+<% for (var key in config) { %>
+  <div class="panel panel-default panel-channel" id="channel-<%= key %>">
+    <div class="panel-body">
+      <% include channel.ejs %>
+    </div>
+  </div>
+<% } %>
+--%>
+
+<%--
+  <div class="modal modal-leds" data-old="<%= channel.leds %>">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+          <h4 class="modal-title">Leds</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="ul-leds">
+            <% for (var i = 1; i <= 56; i++) { %>
+              <li>
+                <input type="checkbox" data-toggle="toggle" data-size="small" <% if (channel.leds.split(', ').indexOf(i.toString()) > -1) { %> checked <% } %> >
+                <span><%= i %></span>
+              </li>
+            <% } %>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal modal-color" data-old="rgb(<%= channel.color %>)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+          <h4 class="modal-title">Pick a new color</h4>
+        </div>
+        <div class="modal-body">
+          <div class="picker">
+            <input type="text" class="color-picker">
+          </div>
+          <div class="display">
+            <div class="old"><p>Old</p></div>
+            <div class="new"><p>New</p></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+--%>

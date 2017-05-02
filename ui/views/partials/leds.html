@@ -1,0 +1,23 @@
+<div class="modal-leds">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+        <h4 class="modal-title">Leds</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="ul-leds">
+          <% for (var i = 1; i <= 56; i++) { %>
+            <li>
+              <input type="checkbox" data-toggle="toggle" data-size="small" <% if (leds.indexOf(i) > -1) { %> checked <% } %> >
+              <span><%= i %></span>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

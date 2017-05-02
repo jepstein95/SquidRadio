@@ -1,0 +1,3 @@
+*.pyc
+/music
+/ui/public/javascripts/app.js

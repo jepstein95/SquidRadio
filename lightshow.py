@@ -1,56 +1,4 @@
 #!/usr/bin/env python
-#
-# Licensed under the BSD license.  See full license in LICENSE file.
-# http://www.lightshowpi.com/
-#
-# Author: Todd Giles (todd@lightshowpi.com)
-# Author: Chris Usey (chris.usey@gmail.com)
-# Author: Ryan Jennings
-# Author: Paul Dunn (dunnsept@gmail.com)
-"""
-Play any audio file and synchronize lights to the music
-
-When executed, this script will play an audio file, as well as turn on
-and off N channels of lights to the music (by default the first 8 GPIO
-channels on the Rasberry Pi), based upon music it is playing. Many
-types of audio files are supported (see decoder.py below), but it has
-only been tested with wav and mp3 at the time of this writing.
-
-The timing of the lights turning on and off is based upon the frequency
-response of the music being played.  A short segment of the music is
-analyzed via FFT to get the frequency response across each defined
-channel in the audio range.  Each light channel is then faded in and
-out based upon the amplitude of the frequency response in the 
-corresponding audio channel.  Fading is accomplished with a software 
-PWM output.  Each channel can also be configured to simply turn on and
-off as the frequency response in the corresponding channel crosses a 
-threshold.
-
-FFT calculation can be CPU intensive and in some cases can adversely
-affect playback of songs (especially if attempting to decode the song
-as well, as is the case for an mp3).  For this reason, the FFT 
-cacluations are cached after the first time a new song is played.
-The values are cached in a gzip'd text file in the same location as the
-song itself.  Subsequent requests to play the same song will use the
-cached information and not recompute the FFT, thus reducing CPU
-utilization dramatically and allowing for clear music playback of all
-audio file types.
-
-Recent optimizations have improved this dramatically and most users are
-no longer reporting adverse playback of songs even on the first 
-playback.
-
-Third party dependencies:
-
-alsaaudio: for audio input/output 
-    http://pyalsaaudio.sourceforge.net/
-
-decoder.py: decoding mp3, ogg, wma, ... 
-    https://pypi.python.org/pypi/decoder.py/1.5XB
-
-numpy: for FFT calcuation 
-    http://www.numpy.org/
-"""
 
 import argparse
 import atexit
@@ -74,9 +22,6 @@ import numpy as np
 
 from configobj import ConfigObj
 
-MIN_FREQUENCY = 30
-MAX_FREQUENCY = 15000
-
 CHANNEL_LEN = 5
 CHANNEL_MAX = 1
 NUM_LEDS = 56
@@ -84,7 +29,6 @@ LED_DELAY = 50
 CHANNEL_DELAY = 200
 
 CHUNK_SIZE = 1024
-
 AUDIO_IN_SAMPLE_RATE = 44100
 AUDIO_IN_CHANNELS = 2
 AUDIO_IN_CARD  = 'hw:1'
@@ -110,23 +54,7 @@ def clean_up():
     send_list([(0, 0, 0)] * NUM_LEDS)
     os._exit(0)
 
-def calculate_channel_frequency(min_frequency, max_frequency):
-    octaves = (np.log(max_frequency / min_frequency)) / np.log(2)
-    octaves_per_channel = octaves / CHANNEL_LEN
-    frequency_limits = []
-    frequency_store = []
-
-    frequency_limits.append(min_frequency)
-    for i in range(1, CHANNEL_LEN + 1):
-        frequency_limits.append(frequency_limits[-1]
-                                * 10 ** (3 / (10 * (1 / octaves_per_channel))))
-    for i in range(0, CHANNEL_LEN):
-        frequency_store.append((frequency_limits[i], frequency_limits[i + 1]))
-
-    return frequency_store
-
 def get_config():
-        # Open appropriate config file
     dir = os.path.dirname(__file__)
     if not os.path.exists(os.path.join(dir, 'config/temp.ini')):
         if not os.path.exists(os.path.join(dir, 'config/overrides.ini')):
@@ -225,42 +153,6 @@ def send_list(leds):
     serial_port.flush()
     serial_port.flushInput()
 
-def play_song(song_filename):
-    matrix = [0 for _ in range(CHANNEL_LEN)]
-
-    if song_filename.endswith('.wav'):
-        musicfile = wave.open(song_filename, 'r')
-    else:
-        musicfile = decoder.open(song_filename)
-
-    sample_rate = musicfile.getframerate()
-    num_channels = musicfile.getnchannels()
-
-    output = aa.PCM(aa.PCM_PLAYBACK, aa.PCM_NORMAL, AUDIO_OUT_CARD)
-    output.setchannels(num_channels)
-    output.setrate(sample_rate)
-    output.setformat(aa.PCM_FORMAT_S16_LE)
-    output.setperiodsize(CHUNK_SIZE)
-
-    # The values 12 and 1.5 are good estimates for first time playing back 
-    # (i.e. before we have the actual mean and standard deviations 
-    # calculated for each channel).
-    mean = [12.0 for _ in range(CHANNEL_LEN)]
-    std = [1.5 for _ in range(CHANNEL_LEN)]
-    
-    data = musicfile.readframes(CHUNK_SIZE)
-    frequency_limits = calculate_channel_frequency(MIN_FREQUENCY, MAX_FREQUENCY)
-
-    while data != '':
-        output.write(data)
-        matrix = fft.calculate_levels(data, CHUNK_SIZE, sample_rate, frequency_limits, CHANNEL_LEN)
-        update_lights(matrix, mean, std)
-
-        # Read next chunk of data from music song_filename
-        data = musicfile.readframes(CHUNK_SIZE)
-
-    clean_up()
-
 def audio_in():
     stream = aa.PCM(aa.PCM_CAPTURE, aa.PCM_NORMAL, AUDIO_IN_CARD)
     stream.setchannels(AUDIO_IN_CHANNELS)
@@ -270,8 +162,6 @@ def audio_in():
          
     print "Running in audio-in mode, use Ctrl+C to stop"
     try:
-        #frequency_limits = calculate_channel_frequency(MIN_FREQUENCY, MAX_FREQUENCY)
-        #print frequency_limits
 
         # Start with these as our initial guesses - will calculate a rolling mean / std 
         # as we get input data.
@@ -301,11 +191,6 @@ def audio_in():
                         # Bad data --- skip it
                         continue
                 except ValueError as e:
-                    # TODO(todd): This is most likely occuring due to extra time in calculating
-                    # mean/std every 250 samples which causes more to be read than expected the
-                    # next time around.  Would be good to update mean/std in separate thread to
-                    # avoid this --- but for now, skip it when we run into this error is good 
-                    # enough ;)
                     continue
 
                 update_lights(matrix, mean, std, config)
@@ -341,7 +226,6 @@ def audio_in():
 
 if __name__ == "__main__":
     init()
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--file', help='Song to play.')
     args = parser.parse_args()

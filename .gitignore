@@ -1,6 +1,2 @@
 *.pyc
-/music
-/shairport
-/ui/node_modules
-/ui/public/javascripts/app.js
-
+.DS_Store
